@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: wallpaper-api
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: admin
+    url: jdbc:mysql://localhost:3306/wallpaper_db
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: true
+
+server:
+  port: 8080
+  error:
+    include-message: always
