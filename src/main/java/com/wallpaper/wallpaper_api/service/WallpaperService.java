@@ -11,4 +11,8 @@ public interface WallpaperService {
     List<WallpaperEntity> getWallpapers();
 
     Optional<WallpaperEntity> getWallpaper(Integer id);
+
+    boolean isWallpaperExist(Integer id);
+
+    void deleteWallpaper(Integer id);
 }

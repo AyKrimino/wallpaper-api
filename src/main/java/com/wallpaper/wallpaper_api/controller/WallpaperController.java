@@ -69,4 +69,14 @@ public class WallpaperController {
                 }
         ).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity  deleteWallpaper(@PathVariable("id") Integer id) {
+        if (!wallpaperService.isWallpaperExist(id)) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        wallpaperService.deleteWallpaper(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }

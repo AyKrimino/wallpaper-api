@@ -30,4 +30,14 @@ public class WallpaperServiceImpl implements WallpaperService {
     public Optional<WallpaperEntity> getWallpaper(Integer id) {
         return wallpaperRepository.findById(id);
     }
+
+    @Override
+    public boolean isWallpaperExist(Integer id) {
+        return wallpaperRepository.existsById(id);
+    }
+
+    @Override
+    public void deleteWallpaper(Integer id) {
+        wallpaperRepository.deleteById(id);
+    }
 }
