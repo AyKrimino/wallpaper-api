@@ -4,13 +4,18 @@ import com.wallpaper.wallpaper_api.dto.WallpaperDto;
 import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import com.wallpaper.wallpaper_api.mapper.Mapper;
 import com.wallpaper.wallpaper_api.service.WallpaperService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -21,10 +26,21 @@ public class WallpaperController {
     private WallpaperService wallpaperService;
 
     @Autowired
-    private Mapper<WallpaperEntity,  WallpaperDto> wallpaperMapper;
+    private Mapper<WallpaperEntity, WallpaperDto> wallpaperMapper;
 
     @PostMapping
-    public ResponseEntity<WallpaperDto> addWallpaper(@RequestBody WallpaperDto wallpaperDto) {
+    public ResponseEntity<?> addWallpaper(@Valid @RequestBody WallpaperDto wallpaperDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            bindingResult.getFieldErrors().forEach(fieldError -> errors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage()));
+            bindingResult.getGlobalErrors().forEach(globalError -> errors.add(globalError.getDefaultMessage()));
+
+            Map<String, Object> body = Map.of(
+                    "messages", errors
+            );
+            return ResponseEntity.badRequest().body(body);
+        }
+
         WallpaperEntity wallpaperEntity = wallpaperMapper.mapFrom(wallpaperDto);
         WallpaperEntity createdWallpaperEntity = wallpaperService.saveWallpaper(wallpaperEntity);
 
@@ -44,8 +60,8 @@ public class WallpaperController {
         Optional<WallpaperEntity> wallpaper = wallpaperService.getWallpaper(id);
 
         return wallpaper.map(wallpaperEntity -> {
-            WallpaperDto wallpaperDto = wallpaperMapper.mapTo(wallpaperEntity);
-            return new ResponseEntity<>(wallpaperDto, HttpStatus.OK);
+                    WallpaperDto wallpaperDto = wallpaperMapper.mapTo(wallpaperEntity);
+                    return new ResponseEntity<>(wallpaperDto, HttpStatus.OK);
                 }
         ).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -55,23 +71,23 @@ public class WallpaperController {
                                                         @RequestBody WallpaperDto wallpaperDto) {
         Optional<WallpaperEntity> wallpaper = wallpaperService.getWallpaper(id);
 
-        return  wallpaper.map(existingEntity -> {
-            existingEntity.setUrl(wallpaperDto.getUrl());
-            existingEntity.setPath(wallpaperDto.getPath());
-            existingEntity.setResolution(wallpaperDto.getResolution());
-            existingEntity.setAuthor(wallpaperDto.getAuthor());
-            existingEntity.setLicence(wallpaperDto.getLicence());
-            existingEntity.setTags(wallpaperDto.getTags());
+        return wallpaper.map(existingEntity -> {
+                    existingEntity.setUrl(wallpaperDto.getUrl());
+                    existingEntity.setPath(wallpaperDto.getPath());
+                    existingEntity.setResolution(wallpaperDto.getResolution());
+                    existingEntity.setAuthor(wallpaperDto.getAuthor());
+                    existingEntity.setLicence(wallpaperDto.getLicence());
+                    existingEntity.setTags(wallpaperDto.getTags());
 
-            WallpaperEntity  updated = wallpaperService.saveWallpaper(existingEntity);
-            WallpaperDto result = wallpaperMapper.mapTo(updated);
-            return new ResponseEntity<>(result, HttpStatus.OK);
+                    WallpaperEntity updated = wallpaperService.saveWallpaper(existingEntity);
+                    WallpaperDto result = wallpaperMapper.mapTo(updated);
+                    return new ResponseEntity<>(result, HttpStatus.OK);
                 }
         ).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity  deleteWallpaper(@PathVariable("id") Integer id) {
+    public ResponseEntity deleteWallpaper(@PathVariable("id") Integer id) {
         if (!wallpaperService.isWallpaperExist(id)) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
