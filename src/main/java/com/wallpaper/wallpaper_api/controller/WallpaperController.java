@@ -5,13 +5,13 @@ import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import com.wallpaper.wallpaper_api.mapper.Mapper;
 import com.wallpaper.wallpaper_api.service.WallpaperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/wallpapers")
@@ -33,10 +33,10 @@ public class WallpaperController {
     }
 
     @GetMapping
-    public List<WallpaperDto> getWallpapers() {
-        List<WallpaperEntity> wallpapers = wallpaperService.getWallpapers();
+    public Page<WallpaperDto> getWallpapers(Pageable pageable) {
+        Page<WallpaperEntity> wallpapers = wallpaperService.getWallpapers(pageable);
 
-        return wallpapers.stream().map(wallpaperMapper::mapTo).collect(Collectors.toList());
+        return wallpapers.map(wallpaperMapper::mapTo);
     }
 
     @GetMapping("/{id}")

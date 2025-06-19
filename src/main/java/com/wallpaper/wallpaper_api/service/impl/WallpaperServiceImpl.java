@@ -4,11 +4,11 @@ import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import com.wallpaper.wallpaper_api.repository.WallpaperRepository;
 import com.wallpaper.wallpaper_api.service.WallpaperService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class WallpaperServiceImpl implements WallpaperService {
@@ -22,8 +22,8 @@ public class WallpaperServiceImpl implements WallpaperService {
     }
 
     @Override
-    public List<WallpaperEntity> getWallpapers() {
-        return wallpaperRepository.findAll().stream().collect(Collectors.toList());
+    public Page<WallpaperEntity> getWallpapers(Pageable pageable) {
+        return wallpaperRepository.findAll(pageable);
     }
 
     @Override
