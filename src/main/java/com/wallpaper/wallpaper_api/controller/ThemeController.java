@@ -100,7 +100,13 @@ public class ThemeController {
         Optional<ThemeEntity> theme = themeService.getTheme(id);
 
         return theme.map(themeEntity -> {
+            List<Integer> wallpaperIds = themeEntity
+                            .getWallpapers()
+                            .stream()
+                            .map(WallpaperEntity::getId)
+                            .toList();
             ThemeDto response = themeMapper.mapTo(themeEntity);
+            response.setWallpaperIds(wallpaperIds);
             return new ResponseEntity<>(response, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
