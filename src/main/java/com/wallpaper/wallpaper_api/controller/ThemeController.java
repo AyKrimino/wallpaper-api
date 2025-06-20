@@ -92,7 +92,17 @@ public class ThemeController {
     public Page<ThemeDto> getThemes(Pageable pageable) {
         Page<ThemeEntity> pages = themeService.getThemes(pageable);
 
-        return pages.map(themeMapper::mapTo);
+        return pages.map(themeEntity -> {
+            List<Integer> wallpaperIds = themeEntity
+                    .getWallpapers()
+                    .stream()
+                    .map(WallpaperEntity::getId)
+                    .toList();
+
+            ThemeDto themeDto = themeMapper.mapTo(themeEntity);
+            themeDto.setWallpaperIds(wallpaperIds);
+            return themeDto;
+        });
     }
 
     @GetMapping("/{id}")
