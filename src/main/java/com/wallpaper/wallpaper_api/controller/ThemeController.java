@@ -4,26 +4,30 @@ import com.wallpaper.wallpaper_api.dto.ThemeDto;
 import com.wallpaper.wallpaper_api.entity.ThemeEntity;
 import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import com.wallpaper.wallpaper_api.exception.ResourceNotFoundException;
+import com.wallpaper.wallpaper_api.mapper.Mapper;
 import com.wallpaper.wallpaper_api.service.ThemeService;
 import com.wallpaper.wallpaper_api.service.WallpaperService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
+
+    @Autowired
+    private Mapper<ThemeEntity, ThemeDto> themeMapper;
 
     @Autowired
     private ThemeService themeService;
@@ -82,5 +86,22 @@ public class ThemeController {
         response.setUpdatedAt(createdEntity.getUpdatedAt());
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public Page<ThemeDto> getThemes(Pageable pageable) {
+        Page<ThemeEntity> pages = themeService.getThemes(pageable);
+
+        return pages.map(themeMapper::mapTo);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ThemeDto> getTheme(@PathVariable("id") Integer id) {
+        Optional<ThemeEntity> theme = themeService.getTheme(id);
+
+        return theme.map(themeEntity -> {
+            ThemeDto response = themeMapper.mapTo(themeEntity);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
