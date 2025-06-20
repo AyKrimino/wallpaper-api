@@ -12,4 +12,8 @@ public interface ThemeService {
     Page<ThemeEntity> getThemes(Pageable pageable);
 
     Optional<ThemeEntity> getTheme(Integer id);
+
+    boolean isThemeExist(Integer id);
+
+    void deleteTheme(Integer id);
 }

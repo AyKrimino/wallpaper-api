@@ -29,4 +29,14 @@ public class ThemeServiceImpl implements ThemeService {
     public Optional<ThemeEntity> getTheme(Integer id) {
         return themeRepository.findById(id);
     }
+
+    @Override
+    public boolean isThemeExist(Integer id) {
+        return themeRepository.existsById(id);
+    }
+
+    @Override
+    public void deleteTheme(Integer id) {
+        themeRepository.deleteById(id);
+    }
 }

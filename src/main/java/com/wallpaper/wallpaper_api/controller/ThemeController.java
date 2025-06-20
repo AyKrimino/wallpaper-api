@@ -104,4 +104,14 @@ public class ThemeController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteTheme(@PathVariable("id") Integer id) {
+        if (!themeService.isThemeExist(id)) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        themeService.deleteTheme(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }
