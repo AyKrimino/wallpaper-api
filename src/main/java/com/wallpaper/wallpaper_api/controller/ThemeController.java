@@ -105,6 +105,35 @@ public class ThemeController {
         }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ThemeDto> updateTheme(@PathVariable("id") Integer id,
+                                                @RequestBody ThemeDto themeDto) {
+        Optional<ThemeEntity> theme = themeService.getTheme(id);
+
+        return theme
+                .map(existingEntity -> {
+                    existingEntity.setName(themeDto.getName());
+                    existingEntity.setDescription(themeDto.getDescription());
+                    existingEntity.setWallpapers(
+                            themeDto
+                                    .getWallpaperIds()
+                                    .stream()
+                                    .map(wallpaperId -> wallpaperService
+                                            .getWallpaper(wallpaperId)
+                                            .orElseThrow(() -> new ResourceNotFoundException("Wallpaper " +
+                                            "with id " + wallpaperId + "not found"))
+                                    )
+                                    .collect(Collectors.toList())
+                    );
+
+                    ThemeEntity updated = themeService.saveTheme(existingEntity);
+                    ThemeDto response = themeMapper.mapTo(updated);
+
+                    return new ResponseEntity<>(response, HttpStatus.OK);
+                })
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity deleteTheme(@PathVariable("id") Integer id) {
         if (!themeService.isThemeExist(id)) {
