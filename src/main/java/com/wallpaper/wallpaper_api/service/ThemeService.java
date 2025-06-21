@@ -1,6 +1,7 @@
 package com.wallpaper.wallpaper_api.service;
 
 import com.wallpaper.wallpaper_api.entity.ThemeEntity;
+import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,4 +17,6 @@ public interface ThemeService {
     boolean isThemeExist(Integer id);
 
     void deleteTheme(Integer id);
+
+    Optional<WallpaperEntity> applyTheme(Integer id);
 }

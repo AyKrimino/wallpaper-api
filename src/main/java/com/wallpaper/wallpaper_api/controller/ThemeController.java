@@ -1,6 +1,7 @@
 package com.wallpaper.wallpaper_api.controller;
 
 import com.wallpaper.wallpaper_api.dto.ThemeDto;
+import com.wallpaper.wallpaper_api.dto.WallpaperDto;
 import com.wallpaper.wallpaper_api.entity.ThemeEntity;
 import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
 import com.wallpaper.wallpaper_api.exception.ResourceNotFoundException;
@@ -28,6 +29,9 @@ public class ThemeController {
 
     @Autowired
     private Mapper<ThemeEntity, ThemeDto> themeMapper;
+
+    @Autowired
+    private Mapper<WallpaperEntity, WallpaperDto> wallpaperMapper;
 
     @Autowired
     private ThemeService themeService;
@@ -135,7 +139,8 @@ public class ThemeController {
                                     .map(wallpaperId -> wallpaperService
                                             .getWallpaper(wallpaperId)
                                             .orElseThrow(() -> new ResourceNotFoundException("Wallpaper " +
-                                            "with id " + wallpaperId + "not found"))
+                                                    "with id " + wallpaperId + " not " +
+                                                    "found"))
                                     )
                                     .collect(Collectors.toList())
                     );
@@ -156,5 +161,22 @@ public class ThemeController {
 
         themeService.deleteTheme(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/{id}/apply")
+    public ResponseEntity<?> applyTheme(@PathVariable Integer id) {
+        Optional<WallpaperEntity> wallpaper = themeService.applyTheme(id);
+
+        return wallpaper
+                .map(
+                        wallpaperEntity -> {
+                            WallpaperDto response =
+                                    wallpaperMapper.mapTo(wallpaperEntity);
+                            return new ResponseEntity<>(Map.<String, Object>of(
+                                    "nextWallpaper",
+                                    response), HttpStatus.OK);
+                        }
+                )
+                .orElse(new ResponseEntity<>(Map.of("message", "Theme with id " + id + " does not exist"), HttpStatus.NOT_FOUND));
     }
 }
