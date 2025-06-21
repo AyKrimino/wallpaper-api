@@ -106,8 +106,22 @@ public class ThemeController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ThemeDto> updateTheme(@PathVariable("id") Integer id,
-                                                @RequestBody ThemeDto themeDto) {
+    public ResponseEntity<?> updateTheme(@PathVariable("id") Integer id,
+                                         @Valid @RequestBody ThemeDto themeDto,
+                                         BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+
+            bindingResult.getFieldErrors().forEach(fieldError -> errors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage())
+            );
+
+            bindingResult.getGlobalErrors().forEach(globalError -> errors.add(globalError.getDefaultMessage())
+            );
+
+            Map<String, Object> body = Map.of("messages", errors);
+            return ResponseEntity.badRequest().body(body);
+        }
+
         Optional<ThemeEntity> theme = themeService.getTheme(id);
 
         return theme

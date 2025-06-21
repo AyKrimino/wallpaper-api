@@ -67,8 +67,19 @@ public class WallpaperController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WallpaperDto> updateWallpaper(@PathVariable("id") Integer id,
-                                                        @RequestBody WallpaperDto wallpaperDto) {
+    public ResponseEntity<?> updateWallpaper(@PathVariable("id") Integer id,
+                                                        @Valid @RequestBody WallpaperDto wallpaperDto, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            List<String> errors = new ArrayList<>();
+            bindingResult.getFieldErrors().forEach(fieldError -> errors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage()));
+            bindingResult.getGlobalErrors().forEach(globalError -> errors.add(globalError.getDefaultMessage()));
+
+            Map<String, Object> body = Map.of(
+                    "messages", errors
+            );
+            return ResponseEntity.badRequest().body(body);
+        }
+
         Optional<WallpaperEntity> wallpaper = wallpaperService.getWallpaper(id);
 
         return wallpaper.map(existingEntity -> {
