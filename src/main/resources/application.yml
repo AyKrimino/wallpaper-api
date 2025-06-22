@@ -3,9 +3,9 @@ spring:
     name: wallpaper-api
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: admin
-    url: jdbc:mysql://localhost:3306/wallpaper_db
-    password: admin
+    username: ${DB_USERNAME:admin}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/wallpaper_db}
+    password: ${DB_PASSWORD:admin}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,6 +18,6 @@ spring:
         one-indexed-parameters: true
 
 server:
-  port: 8080
+  port: ${APP_PORT:8080}
   error:
     include-message: always
