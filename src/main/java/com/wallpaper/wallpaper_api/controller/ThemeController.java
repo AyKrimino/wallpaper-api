@@ -56,38 +56,11 @@ public class ThemeController {
             return ResponseEntity.badRequest().body(body);
         }
 
-        ThemeEntity themeEntity = new ThemeEntity();
-        themeEntity.setName(themeDto.getName());
-        themeEntity.setDescription(themeDto.getDescription());
-        themeEntity.setCurrentIndex(0);
-
-        List<WallpaperEntity> list = themeDto
-                .getWallpaperIds()
-                .stream()
-                .map(wallpaperId -> wallpaperService
-                        .getWallpaper(wallpaperId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Wallpaper " +
-                                "with id " + wallpaperId + "not found"))
-                )
-                .collect(Collectors.toList());
-        themeEntity.setWallpapers(list);
+        ThemeEntity themeEntity = themeMapper.mapFrom(themeDto);
 
         ThemeEntity createdEntity = themeService.saveTheme(themeEntity);
 
-        ThemeDto response = new ThemeDto();
-        response.setId(createdEntity.getId());
-        response.setName(createdEntity.getName());
-        response.setDescription(createdEntity.getDescription());
-        response.setWallpaperIds(
-                createdEntity
-                        .getWallpapers()
-                        .stream()
-                        .map(WallpaperEntity::getId)
-                        .collect(Collectors.toList())
-        );
-        response.setCurrentIndex(createdEntity.getCurrentIndex());
-        response.setCreatedAt(createdEntity.getCreatedAt());
-        response.setUpdatedAt(createdEntity.getUpdatedAt());
+        ThemeDto response = themeMapper.mapTo(createdEntity);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }

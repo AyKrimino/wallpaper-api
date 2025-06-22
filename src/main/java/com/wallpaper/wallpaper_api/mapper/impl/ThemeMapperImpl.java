@@ -3,7 +3,9 @@ package com.wallpaper.wallpaper_api.mapper.impl;
 import com.wallpaper.wallpaper_api.dto.ThemeDto;
 import com.wallpaper.wallpaper_api.entity.ThemeEntity;
 import com.wallpaper.wallpaper_api.entity.WallpaperEntity;
+import com.wallpaper.wallpaper_api.exception.ResourceNotFoundException;
 import com.wallpaper.wallpaper_api.mapper.Mapper;
+import com.wallpaper.wallpaper_api.service.WallpaperService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,10 +13,13 @@ import org.springframework.stereotype.Component;
 import java.util.stream.Collectors;
 
 @Component
-public class ThemeMapperImpl implements Mapper<ThemeEntity, ThemeDto>  {
+public class ThemeMapperImpl implements Mapper<ThemeEntity, ThemeDto> {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private WallpaperService wallpaperService;
 
     @Override
     public ThemeDto mapTo(ThemeEntity themeEntity) {
@@ -32,6 +37,19 @@ public class ThemeMapperImpl implements Mapper<ThemeEntity, ThemeDto>  {
 
     @Override
     public ThemeEntity mapFrom(ThemeDto themeDto) {
-        return modelMapper.map(themeDto, ThemeEntity.class);
+        //return modelMapper.map(themeDto, ThemeEntity.class);
+        ThemeEntity themeEntity = modelMapper.map(themeDto, ThemeEntity.class);
+        themeEntity.setWallpapers(
+                themeDto
+                        .getWallpaperIds()
+                        .stream()
+                        .map(wallpaperId -> wallpaperService
+                                .getWallpaper(wallpaperId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Wallpaper " +
+                                        "with id " + wallpaperId + "not found"))
+                        ).collect(Collectors.toList())
+        );
+
+        return themeEntity;
     }
 }
